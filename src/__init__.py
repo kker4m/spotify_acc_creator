@@ -1,12 +1,24 @@
-from functools import reduce
+##for Type Hinting
+from typing import Union, Optional
+
+##selenium libraries
 import seleniumwire.undetected_chromedriver.v2 as seleniumWireWebdriver
 import undetected_chromedriver as webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import Keys
+from selenium.webdriver.support.ui import Select
+
+##indispensable
+import string
+import random
 import os
 import time
 import json
 from sys import platform
-
+from functools import reduce
 
 class ChromeWithPrefs(webdriver.Chrome):
     def __init__(self, *args, options=None,data_dir=False,**kwargs):
@@ -17,7 +29,7 @@ class ChromeWithPrefs(webdriver.Chrome):
             self.keep_user_data_dir = True
         else:
             self.keep_user_data_dir = False
-
+    
     @staticmethod
     def handle_prefs(options,data_dir):
         if prefs := options.experimental_options.get("prefs"):
