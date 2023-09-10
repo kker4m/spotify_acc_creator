@@ -1,27 +1,33 @@
-##for Type Hinting
-from typing import Union, Optional
+try:
+    ##for Type Hinting
+    from typing import Union, Optional
 
-##selenium libraries
-import seleniumwire.undetected_chromedriver.v2 as seleniumWireWebdriver
-import undetected_chromedriver as webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver import Keys
-from selenium.webdriver.support.ui import Select
+    ##selenium libraries
+    import seleniumwire.undetected_chromedriver.v2 as seleniumWireWebdriver
+    import undetected_chromedriver as webdriver
+    from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+    from selenium.webdriver.support.wait import WebDriverWait
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver import Keys
+    from selenium.webdriver.support.ui import Select
 
-##twocaptcha library
-from twocaptcha import TwoCaptcha
+    ##twocaptcha library
+    from twocaptcha import TwoCaptcha
 
-##indispensable
-import string
-import random
-import os
-import time
-import json
-from sys import platform
-from functools import reduce
+    ##indispensable
+    import httpx
+    import string
+    import random
+    import os
+    import time
+    import json
+    from sys import platform
+    from functools import reduce
+except:
+    print('Modules not found! Please run `install.bat` and restart the tool.')
+    input()
+    exit()
 
 class ChromeWithPrefs(webdriver.Chrome):
     def __init__(self, *args, options=None,data_dir=False,**kwargs):
