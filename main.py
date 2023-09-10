@@ -310,11 +310,11 @@ if __name__ == "__main__":
         result = x.register()
 
         if result:
-            for account_url in account_urls[0][1:]:
+            for account_url in account_urls:
                 print(account_url)
                 x.follow_account(account_url)
                 
-            for playlist_url in playlist_urls[0][1:]:
+            for playlist_url in playlist_urls:
                 x.like_playlist(playlist_url)
             
             count-=1

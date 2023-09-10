@@ -6,5 +6,5 @@
 #               \/            \/    \/    \/            \/      \/ 
 __title__ = "spotify_acc_creator"
 __description__ = "Spotify Account Creator + Follower + Playlist Liker Bot"
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 __author__ = "linuxkerem"
