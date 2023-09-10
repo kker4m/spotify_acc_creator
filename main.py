@@ -2,13 +2,26 @@ from src import *
 
 class account_manager():
 
-    def __init__(self,username: Optional[str]=None, password: Optional[str]=None, store_data: bool = False):
+    def __init__(self,username: Optional[str]=None, password: Optional[str]=None, store_data: bool = False, two_captcha_api: Optional[str] = None):
         self.driver = None
         self.username = username
         self.password = password
         self.store_data = store_data
-
+        self.two_captcha_api = two_captcha_api
+        if two_captcha_api != None:
+            config = {
+            'server':           '2captcha.com',
+            'apiKey':           two_captcha_api,
+            'softId':            123,
+            'defaultTimeout':    120,
+            'recaptchaTimeout':  600,
+            'pollingInterval':   10,
+        }
+            self.solver = TwoCaptcha(**config)
+            
     def register(self) -> bool:
+        print("Register starting")
+
         if self.driver == None:
             print("Driver is not ready, please prepare driver before register.")
             return False
@@ -23,6 +36,7 @@ class account_manager():
             password = self.random_text_generator()
         else:
             password = self.password
+        email = self.random_text_generator(is_mail=True)
 
         ##Getting the page
         self.driver.get("https://www.spotify.com/us/signup")
@@ -30,17 +44,12 @@ class account_manager():
         ##Wait for the first element of the page which is the email input, then send the random generated mail.
         email_input = self.wait_element(self.driver,By.XPATH,"//input[@type='email']",click=True)
         if not email_input: print("Page not loaded correctly, please turn off the headless mode and debug the process."); return False
-        email_input.send_keys(self.random_text_generator(is_mail=True))
-
-        ##Click if next step button appears         
-        self.wait_element(self.driver,By.XPATH,"//button[@data-testid='submit']",click=True,sleep=1,print_=False)
+        email_input.send_keys(email)
 
         ##Send the password input to the password input.
-        password_input = self.wait_element(self.driver,By.XPATH,"//input[@type='password']",click=True,sleep=10)
+        password_input = self.wait_element(self.driver,By.XPATH,"//input[@type='password']",click=True,sleep=5)
+        if not password_input : print("Black register page detected, passing by."); return False
         password_input.send_keys(password)
-
-        ##Click if next step button appears         
-        self.wait_element(self.driver,By.XPATH,"//button[@data-testid='submit']",click=True,sleep=1,print_=False)
 
         ##Send the username to the username input.
         username_input = self.wait_element(self.driver,By.XPATH,"//input[@id='displayname']",click=True,sleep=10)
@@ -61,25 +70,33 @@ class account_manager():
         genders = self.driver.find_element(By.XPATH,"//div[@class='InlineGroup-sc-4o5aq4-0 iNKEny']").find_elements(By.TAG_NAME,'div')
         genders[random.randint(0,len(genders)-1)].click()
 
-        ##Click if next step button appears         
-        self.wait_element(self.driver,By.XPATH,"//button[@data-testid='submit']",click=True,sleep=1,print_=False)
-
-
         ##Click the register button
         self.wait_element(self.driver,By.XPATH,"//button[@type='submit']",click=True,sleep=3)
-        print(f"Account created with username: {username} and password: {password}")
+        
         
         ##Wait till account is created
         while self.driver.current_url.__contains__("download") != True:
+            if self.driver.current_url.__contains__("challenge"):
+                print("Captcha detected")                
+                if self.two_captcha_api == None:
+                    return False
+                else:
+                    print("Solve progress starting.")
+                    if self.captcha_solver():
+                        break
             time.sleep(1)
         
-        time.sleep(1)
+        ##Second check for captcha
+        while self.driver.current_url.__contains__("download") != True:
+            time.sleep(1)
 
         ##Store the data as data.json with appending the data.
         if self.store_data:
             with open("data.json","a") as f:
-                f.write(json.dumps({"username":username,"password":password})+"\n")            
+                f.write(json.dumps({"email":email,"password":password})+"\n")            
             print("Data stored in data.json")
+        
+        print(f"Account created with username: {email} and password: {password}")
 
         return True
 
@@ -109,9 +126,61 @@ class account_manager():
 
         return result
     
-    def prepare_driver(self,page_load_str: str = "normal") -> bool:
+    def captcha_solver(self) -> bool:
         try:
-            self.driver = callUcDriver(headless=False,pageLoadStrategy=page_load_str)
+            ##Solve the captcha with API 
+            site_key_element = self.wait_element(self.driver,By.XPATH,'//div[@class="g-recaptcha"]',click=False,print_=False)
+            site_key = site_key_element.get_attribute("data-sitekey")
+
+            result = self.solver.recaptcha(sitekey=site_key,url=self.driver.current_url)
+            print("Two Captcha API solved captcha, sending the response to the page.")
+            captcha_element = self.wait_element(self.driver,By.XPATH,'//textarea[@id="g-recaptcha-response"]',click=False)
+            
+            ##Make textarea visible
+            self.driver.execute_script(
+                "arguments[0].setAttribute('style','type: text; visibility:visible;');",
+                captcha_element)
+
+            ##Send the response to the textarea
+            captcha_element.send_keys(result.get("code"))
+            
+            time.sleep(2)
+
+            ##Switch the iframe and click the checkbox
+            self.driver.switch_to.frame(self.driver.find_element(By.XPATH,'//iframe[@title="reCAPTCHA"]'))
+            self.wait_element(self.driver,By.XPATH,'//div[@class="recaptcha-checkbox-border"]',click=True)
+
+            time.sleep(3.5)
+
+            ##Switch back to default content and click the next button
+            self.driver.switch_to.default_content()
+            self.driver.find_element(By.XPATH,"//button[@name='solve']").click()
+
+            print("Captcha solved successfully.")
+
+            ## show 2captcha Balance.
+            balance = self.solver.balance()
+            print(f'Your 2captcha balance is ${round(balance, 2)}')
+
+            return True
+        except ValidationException as e:
+            ##invalid parameters passed
+            print("Invalid parameters passed: ",e)
+        except NetworkException as e:
+            ##network error occurred
+            print("Network error occurred: ",e)
+        except ApiException as e:
+            ##api respond with error
+            print("API respond with error: ",e)
+        except TimeoutException as e:
+            ##captcha is not solved so far
+            print("Captcha is not solved so far.")
+
+        return False
+
+    def prepare_driver(self,headless: bool = False,page_load_str: str = "normal") -> bool:
+        try:
+            self.driver = callUcDriver(headless=headless,pageLoadStrategy=page_load_str)
             return True
         except:
             return False
@@ -147,13 +216,19 @@ class account_manager():
         return False
   
 if __name__ == "__main__":
-    hesap_url = "https://open.spotify.com/user/21omz5k2xd42jsl4u62gmcdyy"
-    playlist_url = "https://open.spotify.com/playlist/0xzimMdfGoMBOMTKxIbS59"
+    account_urls = ["https://open.spotify.com/user/"]
+    playlist_urls = ["https://open.spotify.com/playlist/","https://open.spotify.com/playlist/","https://open.spotify.com/playlist/","https://open.spotify.com/playlist/","https://open.spotify.com/playlist/"]
+    two_captcha_api = "two_captcha_API"
+    count = 25
 
-    x = account_manager(store_data=True,username="supre yazilimci")
-    for i in range(2):
-        x.prepare_driver()
-        x.register()
-        x.follow_account(hesap_url)
-        x.like_playlist(playlist_url)
+    x = account_manager(store_data=True,username="Super bot",two_captcha_api=two_captcha_api)
+    
+    while count > 0:
+        x.prepare_driver(headless=False)
+        result = x.register()
+        if result:
+            x.follow_account(hesap_url)
+            for playlist_url in playlist_urls:
+                x.like_playlist(playlist_url)
+            count-=1
         x.quit_driver()
