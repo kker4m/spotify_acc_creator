@@ -1,4 +1,3 @@
 venv
 src/chromedriver.exe
 data.json
-captcha_info.txt
