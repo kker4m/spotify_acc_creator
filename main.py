@@ -47,12 +47,28 @@ class account_manager():
         email_input.send_keys(email)
 
         ##Send the password input to the password input.
-        password_input = self.wait_element(self.driver,By.XPATH,"//input[@type='password']",click=True,sleep=5)
-        if not password_input : print("Black register page detected, passing by."); return False
+        password_input = self.wait_element(self.driver,By.XPATH,"//input[@type='password']",click=True,sleep=3)
+        if not password_input :
+            for i in range(3):
+                ##scroll down 75 pixel
+                self.driver.execute_script("window.scrollBy(0,75)","")
+                password_input = self.wait_element(self.driver,By.XPATH,"//input[@type='password']",click=True,sleep=3)
+                if password_input: break
+
+            if not password_input:
+                print("Black register page detected, passing by.")
+                return False
         password_input.send_keys(password)
 
         ##Send the username to the username input.
         username_input = self.wait_element(self.driver,By.XPATH,"//input[@id='displayname']",click=True,sleep=10)
+        if not username_input:
+            for i in range(3):
+                ##scroll down 75 pixel
+                self.driver.execute_script("window.scrollBy(0,75)","")
+                username_input = self.wait_element(self.driver,By.XPATH,"//input[@id='displayname']",click=True,sleep=3)
+                if username_input: break
+            if not username_input: return False
         username_input.send_keys(username)
 
         ##Close cookies
