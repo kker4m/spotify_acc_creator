@@ -241,10 +241,31 @@ if __name__ == "__main__":
         print('Found some updates on the project! Download the latest version from https://github.com/linuxkerem/spotify_acc_creator to use the tool!')
         exit()
 
-    account_urls = ["https://open.spotify.com/user/"]
-    playlist_urls = ["https://open.spotify.com/playlist/","https://open.spotify.com/playlist/","https://open.spotify.com/playlist/","https://open.spotify.com/playlist/","https://open.spotify.com/playlist/"]
-    two_captcha_api = "two_captcha_API"
-    count = 25
+    account_urls = []
+    playlist_urls = []
+    two_captcha_api = None
+    while True:
+        print(f"Current accounts to follow: {account_urls}\nCurrent playlists to like: {playlist_urls}\nCurrent 2captcha api: {two_captcha_api}\n")
+        choice = input("1-) Add account to follow\n2-) Add playlist to like\n3-) Add 2captcha api\n4-) Start the process\n5-) Exit\n\n")
+        if choice == "1":
+            account_urls.append(input("Account url: "))
+        elif choice == "2":
+            playlist_urls.append(input("Playlist url: "))
+        elif choice == "3":
+            two_captcha_api = input("2captcha api: ")
+        elif choice == "4":
+            count = int(input("How many accounts do you want to create: "))
+            headless_choice = input("Do you want to run the process in headless mode? (y/n) ( Not working correctly ): ")
+            if headless_choice == "y":
+                headless = True
+            else:
+                headless = False
+            break
+        
+        elif choice == "5":
+            exit()
+        else:
+            print("Wrong choice, please try again.")
 
     x = account_manager(store_data=True,username="Super bot",two_captcha_api=two_captcha_api)
     
