@@ -1,0 +1,5 @@
+2captcha_python
+httpx
+selenium
+selenium_wire
+undetected_chromedriver
