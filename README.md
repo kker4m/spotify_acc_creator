@@ -1,5 +1,5 @@
 ## Spotify Account Creator Bot
-Creates Spotify accounts with **selenium** and save it for you.
+Creates Spotify accounts with **selenium** for you.
 
 ## Why selenium instead of requests
 Accounts that you create and process with requests will be deleted from your account or playlist you like in about 2 weeks. To avoid this, I decided to use **selenium**, which is a much **slower** but permanent way. 
@@ -10,7 +10,12 @@ Another disadvantage of using Selenium is encountering **captcha**. I used [twoc
 
 
 ## Usage
-Clone the **repository** and run this command in CMD, terminal or PowerShell ( Make sure you have **Python **in your machine )
+- After logging in to** Google Chrome** (If not, download it), go to the chrome://version URL. In the first line you can see the version of your Google Chrome. Download the **chromedriver.exe** appropriate for your version from this url: https://chromedriver.chromium.org/downloads. Place the **chromedriver.exe** file you downloaded into the **src** folder.
+
+- Run **install.bat** to install all the libraries you need. ( Or you can use manual installation too. )
+
+#### Manual Installation
+After downloading the **chromedriver.exe**, clone the **repository** and run this command in CMD, terminal or PowerShell ( Make sure you have **Python **in your machine )
 > pip install -r requirements.txt
 
 ## Legal Notice
