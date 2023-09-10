@@ -102,13 +102,11 @@ class account_manager():
         self.driver.get(url)
 
         ##Wait for like button and click it
-        result = self.wait_element(self.driver,By.XPATH,'//div[@data-testid="action-bar-row"]',click=True)
+        result = self.wait_element(self.driver,By.XPATH,'//div[@data-testid="action-bar-row"]/button',click=True)
         if result:
-            result.find_elements(By.TAG_NAME,'buttons')[1].click()
             print("Liked the playlist.")
-            input('test1')
-            result.find_elements(By.TAG_NAME,'buttons')[1].find_element(By.TAG_NAME,'span').click()
             time.sleep(3.5)
+
         return result
     
     def prepare_driver(self,page_load_str: str = "normal") -> bool:
@@ -154,10 +152,8 @@ if __name__ == "__main__":
 
     x = account_manager(store_data=True,username="supre yazilimci")
     for i in range(2):
-        x.prepare_driver(page_load_str="eager")
+        x.prepare_driver()
         x.register()
         x.follow_account(hesap_url)
         x.like_playlist(playlist_url)
-        input("Dur")
         x.quit_driver()
-    input("Done")
