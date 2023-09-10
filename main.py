@@ -256,10 +256,25 @@ if __name__ == "__main__":
     if not checkVersion():
         print('Found some updates on the project! Download the latest version from https://github.com/linuxkerem/spotify_acc_creator to use the tool!')
         exit()
-
+    
     account_urls = []
     playlist_urls = []
     two_captcha_api = None
+
+    ##Create saved.json with template if not exists
+    if not os.path.exists("saved.json"):
+        with open("saved.json","w") as f:
+            f.write(json.dumps({"account_url":"","playlist_url":"","two_captcha_api":""})+"\n")
+    
+    ##Read account_urls, playlist_urls and two_captcha_api from data.json
+    with open("saved.json","r") as f:
+        data = f.readlines()
+        for i in data:
+            i = json.loads(i)
+            account_urls.append(i.get("account_url"))
+            playlist_urls.append(i.get("playlist_url"))
+            two_captcha_api = i.get("two_captcha_api")
+    
     while True:
         print(f"Current accounts to follow: {account_urls}\nCurrent playlists to like: {playlist_urls}\nCurrent 2captcha api: {two_captcha_api}\n")
         choice = input("1-) Add account to follow\n2-) Add playlist to like\n3-) Add 2captcha api\n4-) Start the process\n5-) Exit\n\n")
@@ -270,6 +285,12 @@ if __name__ == "__main__":
         elif choice == "3":
             two_captcha_api = input("2captcha api: ")
         elif choice == "4":
+            save_choice = input("Do you want to save the accounts you like and follow? (y/n): ")
+            if save_choice == "y":
+                ##Write account_urls, playlist_urls and two_captcha_api to saved.json
+                with open("saved.json","w") as f:
+                    f.write(json.dumps({"account_url":account_urls,"playlist_url":playlist_urls,"two_captcha_api":two_captcha_api})+"\n")
+
             count = int(input("How many accounts do you want to create: "))
             headless_choice = input("Do you want to run the process in headless mode? (y/n) ( Not working correctly ): ")
             if headless_choice == "y":
@@ -287,13 +308,15 @@ if __name__ == "__main__":
     
     while count > 0:
         x.prepare_driver(headless=False)
+        
         result = x.register()
 
         if result:
-            for account_url in account_urls:
+            for account_url in account_urls[1:]:
+                print(account_url)
                 x.follow_account(account_url)
                 
-            for playlist_url in playlist_urls:
+            for playlist_url in playlist_urls[1:]:
                 x.like_playlist(playlist_url)
             
             count-=1
