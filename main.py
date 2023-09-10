@@ -200,7 +200,7 @@ class account_manager():
         return kullanici_adi
 
     @staticmethod
-    def wait_element(driver: webdriver,element_type,element:str,click: bool = False,trys: int = 1,sleep: int = 20,print_: bool = True)-> Union[False,webdriver.webelement]:
+    def wait_element(driver: webdriver,element_type,element:str,click: bool = False,trys: int = 1,sleep: int = 20,print_: bool = True):
         while trys>0:
             try:
                 if click:
