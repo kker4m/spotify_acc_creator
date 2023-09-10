@@ -1,5 +1,5 @@
 ## Spotify Account Creator Bot
-Creates Spotify accounts with **selenium** for you.
+Creates Spotify accounts with **selenium** and save it for you.
 
 ## Why selenium instead of requests
 Accounts that you create and process with requests will be deleted from your account or playlist you like in about 2 weeks. To avoid this, I decided to use **selenium**, which is a much **slower** but permanent way. 
